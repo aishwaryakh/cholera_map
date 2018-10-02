@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="en">
+<style> div.tooltip {	
+    position: absolute;			
+    text-align: center;			
+    width: 60px;					
+    height: 28px;					
+    padding: 2px;				
+    font: 12px sans-serif;		
+    background: lightsteelblue;	
+    border: 0px;		
+    border-radius: 8px;			
+    pointer-events: none; }
+		
+}
+
+.chart div {
+  font: 10px sans-serif;
+  background-color: steelblue;
+  text-align: right;
+  padding: 3px;
+  margin: 1px;
+  color: white;
+}
+
+	
+</style>
+<head>
+<meta charset="UTF-8">
+	<script src="https://d3js.org/d3.v3.min.js"></script>
+	
+	
+	
+	<div class="chart"></div>
+	
+	<title>Cholera Map by John Snow</title>
+	<style>
+    	text { 
+			font-family: Arial; 
+			font-size: 15px;
+		}
+		.axis path, .axis line {
+			fill: none;
+			stroke: black;
+			shape-rendering: crispEdges;
+		}
+		.tick text {
+			fill: black;
+			font-size: 11px;
+		}
+
+		line{
+			stroke: black;
+		}
+		
+		h1 {
+    position: absolute;
+    left: 5px;
+    top: 0px;
+}
+	
+		
+		h2 {
+    position: absolute;
+    left: 5px;
+    top: 35px;
+}
+
+		h3 {
+    position: absolute;
+    left: 5px;
+    top: 70px;
+}
+
+		h4 {
+    position: absolute;
+    left: 800px;
+    top: 05px;
+}
+
+		h5 {
+    position: absolute;
+    left: 1000px;
+    top: 05px;
+}
+
+		h6 {
+    position: absolute;
+    left: 300px;
+    top: 0px;
+	font-weight: bold;
+  color: #0000ff;
+  font-size: 23px;
+}
+	
+h7 {
+    position: absolute;
+    left: 200px;
+    top: 650px;
+	font-weight: bold;
+  color: #0000ff;
+  font-size: 20px;
+}
+
+h8 {
+    position: absolute;
+    left: 800px;
+    top: 50px;
+	font-weight: bold;
+  color: #0000ff;
+  font-size: 20px;
+}
+
+
+h9 {
+    position: absolute;
+    left: 800px;
+    top: 650px;
+	font-weight: bold;
+  color: #0000ff;
+  font-size: 20px;
+}
+
+	
+
+		
+	</style>
+</head>
+
+
+<h1><div id = "option">
+<input name= "gbutton"
+type="button"
+value="Show all Deaths"
+onclick="allDeaths()"/></h1>
+
+
+<h2><div id = "option">
+<input name= "gbutton"
+type="button"
+value="Show deaths by Gender"
+onclick="deathsByGender()"/></h2>
+
+</div>
+
+
+<h3><div id = "option">
+<input name= "gbutton"
+type="button"
+value="Show deaths by Age"
+onclick="deathsByAge()"/></h3>
+
+
+
+<h4><div id = "option">
+<input name=gbutton"
+type="button"
+value="Documentation"
+onclick="location.href ='Project Documentation.docx'"/></h4>
+ 
+<h5> <div id = "option">
+<input name=gbutton"
+type="button"
+value="Video Demonstration"
+onclick="location.href='https://www.youtube.com/watch?v=vP4vzAU_ESw&feature=youtu.be'"/></h5>
+
+<img src="deathsbyagelegends.png" alt="Legend" width="80" height="80" top="35px" LEFT="170px">
+<img src="deathsbygenderlegends.png" alt="Legend" width="80" height="80">
+ 
+ 
+ <svg width="450" height="600">
+	
+	
+	<g transform="translate(30,40)"></g>
+	<path stroke="black" stroke-width="4px" fill="none"></path>
+	
+</svg>
+ 
+
+<body>
+
+<h8> Recreated-Cholera Map by Dr. John Snow </h8>
+<h7> Deaths By Age Graph</h7>
+<h6> Death Timeline Graph</h6>
+<h9> Deaths By Gender Graph</h9>
+<script type="text/javascript">
+
+
+
+
+  
+  
+//code to plot map + Zoom functionality
+	var svgContainer = d3.select("body").append("svg").attr("width","600").attr("height","600") .call(d3.behavior.zoom().on("zoom", function () {
+    svgContainer.attr("transform", "translate(" + d3.event.translate + ")" + " scale(" + d3.event.scale + ")")
+	}))
+	.append("g");
+	
+	
+	d3.json("streets.json",function(data)
+	{
+
+	data.forEach(function(data) {
+
+	var pathGenerator = d3.svg.line()
+				.x(function(d) { return d.x*30; })
+				.y(function(d) { return d.y*30; })
+				.interpolate("linear");
+
+
+	pathGenerator(data);
+
+	
+	
+	var pathPlot = svgContainer.append("path").attr("stroke","black").attr("stroke-width","3px").attr("fill","none");
+
+	pathPlot.attr("d",pathGenerator(data));
+	
+	});
+	});
+
+//plotting map ends here  
+
+
+
+//Plotting major street names and landmarks
+
+	var street_name = [{name:'CEORCE STREET',x:125,y:222,rotate:55},{name:'BREWER STREET',x:364,y:440,rotate:-58},{name:'BROAD STREET',x:352,y:337,rotate:-55},
+              {name:'RECENT STREET',x:225,y:350,rotate:-52},{name:'OXFORD STREET',x:320,y:160,rotate:-3},
+              {name:'DEAN STREET',x:490,y:260,rotate:-63},{name:'WORK',x:330.5,y:232,rotate:-45},
+              {name:'HOUSE',x:338,y:242,rotate:-45},{name:'BRE.',x:430,y:201,rotate:55}]			  
+			  
+			  
+
+	var workhouse = [{x:313,y:270,w:30,h:22,rotate:-50}]
+
+	var brewery = [{x:417,y:207.5,w:30,h:16,rotate:50.5}]
+
+	svgContainer.selectAll(".place-label")
+		.data(street_name)
+		.enter().append("text")
+		.attr("class","place-label")
+		.attr("transform", function(d) { return "rotate(" + d.rotate + " " + d.x + "," + d.y + ")";})
+		.attr("x", function(d) { return d.x;})
+		.attr("y", function(d) {return d.y;})
+		.attr("dy",".35em")
+		.style("fill","brown")
+		.style("font-size","15")
+		.style("font-weight", "bold")
+		.text(function(d) { return d.name; });
+
+		
+	svgContainer.append("rect")
+							.data(brewery)
+							.attr("transform", function(d)
+							{ return "rotate(" + d.rotate + " " + d.x + "," + d.y+ ")"; })
+							.attr("x",function(d){return d.x;})
+							.attr("y",function(d) {return d.y;})
+							.attr("width", function(d) {return d.w;})
+							.attr("height", function(d) {return d.h;})
+							.style("fill", 'gold');
+							
+							
+	svgContainer.append("rect")
+							.data(workhouse)
+							.attr("transform", function(d)
+							{ return "rotate(" + d.rotate + " " + d.x + "," + d.y+ ")"; })
+							.attr("x",function(d){return d.x;})
+							.attr("y",function(d) {return d.y;})
+							.attr("width", function(d) {return d.w;})
+							.attr("height", function(d) {return d.h;})
+							.style("fill", 'gold');					
+							  
+
+
+// Plotting major street names function ends
+
+
+
+//   Plotting Pumps
+
+	d3.csv("pumps.csv", function(data)
+	{	
+		
+	
+	pumpPlot = svgContainer
+			.selectAll('circle')
+			.data(data)
+			.enter()
+			.append("circle")
+			.style('fill','red')
+			.attr('r',5).attr('cx', function(d) {return d.x*30; })
+			.attr('cy', function(d) {return d.y*30;});	
+		
+	});
+
+// Plotting pumps ends here
+
+
+//Plotting Deaths
+var gender;
+var div = d3.select("body").append("div").attr("class","tooltip").style("opacity",0);
+
+//Plotting all deaths
+function allDeaths()
+{
+deathsPlot.remove();
+
+d3.csv("deaths_age_sex.csv", function(data)
+	{
+	
+	
+	deathsPlot = svgContainer
+			.selectAll('circle')
+			.data(data)
+			.enter()
+			.append("circle")
+			.style('fill','blue')
+			.attr('r',2).attr('cx', function(d) {return d.x*30; })
+			.attr('cy', function(d) {return d.y*30;})
+			.on("mouseover", function(d,i) 
+			{
+			div.transition()
+			.duration(0).style("opacity", .9);
+			div.html(d.gender_int+","+d.age_int)
+			.style("left", (d3.event.pageX) + "px")
+			.style("top",(d3.event.pageY -28) + "px")
+			.attr("width", 20);
+			});
+			
+			/*
+			function convert(gender)
+			{
+			if(d.gender==="0"){ genderval = "Male"}
+			else if(d.gender ==="1"){ genderval= "Female"}
+			return genderval;
+			} */
+});
+}			
+			/*{svgContainer.append("text")
+			.attr({
+               //id: "t" + d.gender + "-" + d.age + "-" + i,  // Create an id for text so we can select it later for removing on mouseout
+                x: function() { return d.x - 20; },
+                y: function() { return d.y - 5; }
+            })
+            .text(function() {
+               if(d.gender === "0"){
+						Gender = "Male"
+				}
+				else if(d.gender === "1") {
+						Gender = "Female"
+				}
+				
+			  return "1";
+			  ;  // Value of the text
+            })
+			.attr("id","nowtext");
+			//const d3This = d3.select(this);
+			//displaydaydeaths(d3This);
+			})
+			.on("mouseout", function(d,i) { 
+			 svgContainer.selectAll("#nowtext").style("display","none");
+			
+			})*/
+
+	//deathsByAge();
+		
+	
+
+ 
+
+//Plotting deaths by age group 
+var deathsPlot = svgContainer.selectAll('circle');
+  
+function deathsByAge()
+{
+deathsPlot.remove();
+var color = ['#808080','#ffff00','#800000','#0000ff','#ff00ff','#000080'];
+// color = [gray,yellow,maroon,blue,fuschia,navy];
+d3.csv("deaths_age_sex.csv", function(data)
+	{	
+	
+	deathsPlot = svgContainer
+			.selectAll('circle')
+			.data(data)
+			.enter()
+			.append('circle')
+			.style('fill',function(d){return color[d.age];})
+			.attr('r',2).attr('cx', function(d) {return d.x*30; })
+			.attr('cy', function(d) {return d.y*30;})
+			.on("mouseover", function(d,i) 
+			{
+			div.transition()
+			.duration(0).style("opacity", .9);
+			div.html(d.gender_int)
+			.style("left", (d3.event.pageX) + "px")
+			.style("top",(d3.event.pageY -28) + "px")
+			.attr("width", 20);
+			});
+
+	
+		
+	});
+}
+
+
+// Plotting deaths by gender	
+function deathsByGender()
+{
+
+deathsPlot.remove();
+
+var color = ['#ffff00','#0000ff'];
+//colors= [yellow,blue]
+d3.csv("deaths_age_sex.csv", function(data)
+	{	
+	
+	
+	deathsPlot = svgContainer
+			.selectAll('circle')
+			.data(data)
+			.enter()
+			.append("circle")
+			.style('fill',function(d){return color[d.gender];})
+			.attr('r',2).attr('cx', function(d) {return d.x*30; })
+			.attr('cy', function(d) {return d.y*30;})
+			.on("mouseover", function(d,i) 
+			{
+			div.transition()
+			.duration(0).style("opacity", .9);
+			div.html("Age:" + d.age_int)
+			.style("left", (d3.event.pageX) + "px")
+			.style("top",(d3.event.pageY -28) + "px")
+			.attr("width", 20);
+			});
+
+	
+		
+	});
+	
+}
+
+//Plotting deaths ends here
+
+//Death Timeline chart
+
+
+
+
+//reading data from file
+d3.csv('deathdays.csv', function(data) 
+{	//console.log(data);
+			
+	for(i=0; i <data.length; i++)
+
+	{
+	var record = data[i];
+
+	var format = d3.time.format("%d-%b");
+	//var value = record[i];
+	var object = {
+			date: format.parse(record.date),
+			deaths: record.deaths
+			
+			};
+		deathDays.push(object);		
+	}
+	
+
+		//console.log(deathDays);
+		drawDeathsGraph();
+
+
+});
+
+
+//var svgContainer2 = d3.select("body").append("svg").attr("width","600").attr("height","500").append("g");
+//Plotting the data read above
+
+
+		var CHART_WIDTH = 400;
+		var CHART_HEIGHT = 150;
+
+		var MAX_BAR_HEIGHT = 100;
+
+		var deathDays= [];
+		
+		//var svgContainer2 = d3.select("body").append("svg").attr("width","600").attr("height","1000");
+
+//function to draw the graph chart
+		function drawDeathsGraph()
+
+{
+			var maxValue = d3.max(deathDays);
+			var xScale = d3.time.scale();//time.linear
+			var yScale = d3.scale.linear();
+			var maxValue = d3.max(deathDays);
+			//var mindate1 = d3.min(deathDays);
+			//var maxdate1 = d3.max(deathDays);
+			//console.log(mindate1);
+//var xScale = d3.time.scale();//time.linear
+
+			var format = d3.time.format("%d-%b");
+			var mindate = format.parse("19-Aug");
+			
+			//console.log(mindate);
+			var maxdate = format.parse('29-Sep');
+			
+			//var mindate = format.parse(mindate1)
+			
+			
+            		
+
+
+			xScale.domain([mindate,maxdate]).range([0, CHART_WIDTH]);
+			yScale.domain([0, 150]).range([CHART_HEIGHT, 0]);
+			
+			//var svg2 = d3.select("body").append("svg").attr("width","400").attr("height","600");
+			
+			var g = d3.select("body").select('svg').select('g').attr("transform","translate(45,200)");
+			//.attr("transform","translate(400,100)");
+			//var g = svg2.select('g').attr("transform","translate(100,100)");
+
+
+
+			var xAxis = d3.svg.axis()
+    			.scale(xScale)
+    			.orient('bottom')
+			.ticks(5)
+    			//.tickFormat(function(d) { return "" + d; })
+				
+				g.append("text")
+				 .attr('class', 'axis-label')
+				.attr('x', 100)
+				.attr('y', 190)
+				.text("Dates")
+				.style("font-size", "20px");
+				
+				g.append("text")
+				.attr('class', 'axis-label')
+				.attr('x', 0)
+				.attr('y', 120)
+				.text("No of Deaths")
+				.attr('transform',"translate(-150,150) rotate(-90)")
+				.style("font-size", "20px");;
+
+    		var yAxis = d3.svg.axis()
+    			.scale(yScale)
+    			.orient('left');
+
+
+    		g.append('g')
+    			.attr('class', 'axis')
+    			.attr('transform', 'translate(0,' + CHART_HEIGHT + ')')
+    			.call(xAxis);
+			//.attr("transform", function(d) {
+				//return "translate(" + this.getBox().height + "," + this.getBox().height + ")rotate(-45)";});
+
+    		g.append('g')
+    			.attr('class', 'axis')
+    			.call(yAxis);
+
+    		/*g.selectAll('circle')
+    			.data(deathDays)
+    			.enter()
+    			.append('circle')
+    			.style('fill', 'steelblue')
+    			.attr('r', 5)
+    			.attr('cx', function(d) { 
+				 return xScale(d.date);})
+    			.attr('cy', function(d) { 
+				return yScale(d.deaths);});*/
+				
+				// Define the line
+	var valueline = d3.svg.line()
+    .x(function(d) { return xScale(d.date); })
+    .y(function(d) { return yScale(d.deaths); });
+	
+	
+	/* Initialize tooltip */
+/*var tooltip = g.append("g").attr('class', 'tooltip').style("display", "none");
+tooltip.append("text").attr("x",15).attr("dy", "1.2em").style("font-size", "1.25em").attr("font-weight","bold");
+
+// Define the div for the tooltip
+var div = d3.select("body").append("div")	
+    .attr("class", "tooltip")				
+    .style("opacity", 0);
+	
+	
+	
+var tip = d3.tip().attr('class', 'd3-tip').html(function(d) { return (d.date + "," + d.deaths)});
+
+/* Invoke the tip in the context of your visualization 
+g.call(tip)*/
+
+
+/* Invoke the tip in the context of your visualization */
+//svg.call(tip)
+	
+	g.append("path")
+		.style('fill','none')
+		.style('stroke', 'steelblue')
+    	.style('stroke-width', '3px')
+        .attr("class", "line")
+        .attr("d", valueline(deathDays));
+		/*.on('mouseover', tip.show)
+		.on('mouseout', tip.hide);
+		.on("mouseover", function(d,i) {		
+            div.transition()		
+                .duration(200)		
+                .style("opacity", .9);		
+				div.html(d.deaths).style("left", (d3.event.pageX) + "px")		
+                .style("top", (d3.event.pageY - 28) + "px");
+            /*div	.text( format.parse(d.date) + ","  + d.deaths)	
+                .style("left", (d3.event.pageX) + "px")		
+                .style("top", (d3.event.pageY - 28) + "px");	
+            })					
+        .on("mouseout", function(d) {		
+            div.transition()		
+                .duration(500)		
+                .style("opacity", 0);	
+        });*/
+		var formatMyTime = d3.time.format("%e %B");
+		
+		g.selectAll('circle')
+    			.data(deathDays)
+    			.enter()
+    			.append('circle')
+    			.style('fill', 'steelblue')
+    			.attr('r', 5)
+    			.attr('cx', function(d) { 
+				 return xScale(d.date);})
+    			.attr('cy', function(d) { 
+				return yScale(d.deaths);})
+					.on("mouseover", function(d,i) {g.append("text")
+		
+			.attr({
+               id: "t" + d.date + "-" + d.deaths + "-" + i,  // Create an id for text so we can select it later for removing on mouseout
+                x: function() { return xScale(d.date) - 20; },
+                y: function() { return yScale(d.deaths) - 5; }
+            })
+            .text(function() {
+              return [ formatMyTime(d.date) + "," +d.deaths]
+			  ;  // Value of the text
+            })
+			.attr("id","nowtext");
+			//const d3This = d3.select(this);
+			//displaydaydeaths(d3This);
+			})
+			.on("mouseout", function(d,i) { 
+			 g.selectAll("#nowtext").style("display","none");
+			
+			})
+}		
+		
+		/*.on("mouseover",tooltip.style("display",null))
+		.on("mouseout",tooltip.style("display","none"))
+		.on("mousemove",function(d){ var xpos = d3.mouse(this)[0]-15;
+									var ypos = d3.mouse(this)[1]-30;
+									tooltip.attr("transform","translate(" + xpos + "," + ypos + ")");
+									tooltip.select("text").text(d.date + ":" + d.deaths);});
+		 //.on("mouseover", function(d) {		
+		 //g.append("text").data(deathDays).text(function(){  return [d.date, d.deaths];});});
+            /*div.transition()		
+                .duration(200)		
+                .style("opacity", .9);		
+            div	.html(format.parse(d.date) + "<br/>"  + d.deaths)	
+                .style("left", (d3.event.pageX) + "px")		
+                .style("top", (d3.event.pageY - 28) + "px");	
+            })				
+        .on("mouseout", function(d) {		
+            div.transition()		
+                .duration(500)		
+                .style("opacity", 0);	
+        });*/
+			
+
+
+
+
+// Pie chart for age wise death stats
+
+agedata = [];
+d3.csv("deaths_age_sex.csv", function(data)	{
+	var groupbyage = d3.nest()
+  .key(function(d) { return d.age; })
+  .rollup(function(v) { return v.length; })
+  .entries(data);
+  //console.log(groupbygender.length);
+		//console.log(groupbygender[0].values);
+	//console.log(JSON.stringify(groupbyage));	
+	
+	
+	for( i =0; i <groupbyage.length; i++)
+	{
+		var value = groupbyage[i];
+					var object = {
+						label: value.key,
+						value: value.values
+					};
+					agedata.push(object);
+	}
+	//console.log(agedata);
+
+
+
+var w = 400,                        //width
+    h = 300,                            //height
+    r = 100, 
+ color = d3.scale.category20c();     //builtin range of colors
+
+    /*data = [{"label":"0-10", "value":143}, 
+            {"label":"11-20", "value":48}, 
+            {"label":"21-40", "value":58},
+			{"label":"41-60", "value":57},
+			{"label":"61-80", "value":91},
+			{"label":">80", "value":174}];*/
+
+			
+			var vis = d3.select("body")
+        .append("svg:svg")              //create the SVG element inside the <body>
+        .data([agedata])                   //associate our data with the document
+            .attr("width", w)           //set the width and height of our visualization (these will be attributes of the <svg> tag
+            .attr("height", h)
+        .append("svg:g")        
+			.attr("transform","translate(250,200)")
+			
+			//make a group to hold our pie chart
+            //.attr("transform", "translate(" + r + "," + r + ")") 
+				//move the center of the pie chart from 0, 0 to radius, radius
+
+    var arc = d3.svg.arc()              //this will create <path> elements for us using arc data
+        .outerRadius(r);
+
+    var pie = d3.layout.pie()           //this will create arc data for us given a list of values
+        .value(function(d) { return d.value; });    //we must tell it out to access the value of each element in our data array
+
+    var arcs = vis.selectAll("g.slice")     //this selects all <g> elements with class slice (there aren't any yet)
+        .data(pie)                          //associate the generated pie data (an array of arcs, each having startAngle, endAngle and value properties) 
+        .enter()                            //this will create <g> elements for every "extra" data element that should be associated with a selection. The result is creating a <g> for every object in the data array
+            .append("svg:g")                //create a group to hold each slice (we will have a <path> and a <text> element associated with each slice)
+                .attr("class", "slice");    //allow us to style things in the slices (like text)
+
+        arcs.append("svg:path")
+                .attr("fill", function(d, i) { return color(i); } ) //set the color for each slice to be chosen from the color function defined above
+                .attr("d", arc)
+				/*.on("mouseover", function(d,i) {vis.append("text")
+            .text(function(d,i) {
+              return [ d.value ]
+			  ;  // Value of the text
+            })
+			.attr("id","nowtext");})
+			.on("mouseout", function(d,i) { 
+			 vis.selectAll("#nowtext").style("display","none")});;   */     //this creates the actual SVG path using the associated data (pie) with the arc drawing function
+		
+        arcs.append("svg:text")
+				.style("font-size","7px")
+				.style("font-weight","bold")				
+                .attr("transform", function(d) {                    //set the label's origin to the center of the arc
+                //we have to make sure to set these before calling arc.centroid
+                d.innerRadius = 0;
+                d.outerRadius = r;
+                return "translate(" + arc.centroid(d) + ")";        //this gives us a pair of coordinates like [50, 50]
+            })
+            .attr("text-anchor", "middle")                          //center the text on it's origin
+            .text(function(d, i) { var value;
+			if( agedata[i].label==="0") {
+				value = "0-10";}
+			else if ( agedata[i].label==="1")
+			{value = "11-20";}
+			else if ( agedata[i].label==="2")
+			{value = "21-40";}
+			else if ( agedata[i].label==="3")
+			{value = "41-60";}
+			else if ( agedata[i].label==="4")
+			{value = "61-80";}
+			else if ( agedata[i].label==="5")
+			{value = ">80";}
+			return (value + "," + agedata[i].value); });
+
+			
+			
+});			//get the label from our original data array
+
+// plotting age death pie chart ends here
+
+
+// Plot bargraph for deaths by gender
+
+var genderdata = [];
+d3.csv("deaths_age_sex.csv", function(data)	{
+	var groupbygender = d3.nest()
+  .key(function(d) { return d.gender; })
+  .rollup(function(v) { return v.length; })
+  .entries(data);
+  //console.log(groupbygender.length);
+		//console.log(groupbygender[0].values);
+	//console.log(JSON.stringify(groupbyage));	
+	
+	
+	for( i =0; i <groupbygender.length; i++)
+	{
+		var value = groupbygender[i];
+					var object = {
+						label: value.key,
+						value: value.values
+					};
+					genderdata.push(object);
+	}
+	
+
+
+var w = 1000,                        //width
+    h = 300,                            //height
+    r = 100, 
+ color = d3.scale.category20c();     //builtin range of colors
+
+    /*data = [{"label":"0-10", "value":143}, 
+            {"label":"11-20", "value":48}, 
+            {"label":"21-40", "value":58},
+			{"label":"41-60", "value":57},
+			{"label":"61-80", "value":91},
+			{"label":">80", "value":174}];*/
+
+			
+			var vis = d3.select("body")
+        .append("svg:svg")              //create the SVG element inside the <body>
+        .data([genderdata])                   //associate our data with the document
+            .attr("width", w)           //set the width and height of our visualization (these will be attributes of the <svg> tag
+            .attr("height", h)
+        .append("svg:g")        
+			.attr("transform","translate(500,200)")
+			
+			//make a group to hold our pie chart
+            //.attr("transform", "translate(" + r + "," + r + ")") 
+				//move the center of the pie chart from 0, 0 to radius, radius
+
+    var arc = d3.svg.arc()              //this will create <path> elements for us using arc data
+        .outerRadius(r);
+
+    var pie = d3.layout.pie()           //this will create arc data for us given a list of values
+        .value(function(d) { return d.value; });    //we must tell it out to access the value of each element in our data array
+
+    var arcs = vis.selectAll("g.slice")     //this selects all <g> elements with class slice (there aren't any yet)
+        .data(pie)                          //associate the generated pie data (an array of arcs, each having startAngle, endAngle and value properties) 
+        .enter()                            //this will create <g> elements for every "extra" data element that should be associated with a selection. The result is creating a <g> for every object in the data array
+            .append("svg:g")                //create a group to hold each slice (we will have a <path> and a <text> element associated with each slice)
+                .attr("class", "slice");    //allow us to style things in the slices (like text)
+
+        arcs.append("svg:path")
+                .attr("fill", function(d, i) { return color(i); } ) //set the color for each slice to be chosen from the color function defined above
+                .attr("d", arc)
+				/*.on("mouseover", function(d,i) {vis.append("text")
+            .text(function(d,i) {
+              return [ d.value ]
+			  ;  // Value of the text
+            })
+			.attr("id","nowtext");})
+			.on("mouseout", function(d,i) { 
+			 vis.selectAll("#nowtext").style("display","none")});;   */     //this creates the actual SVG path using the associated data (pie) with the arc drawing function
+		
+        arcs.append("svg:text")
+				.style("font-size","10px")
+				.style("font-weight","bold")				
+                .attr("transform", function(d) {                    //set the label's origin to the center of the arc
+                //we have to make sure to set these before calling arc.centroid
+                d.innerRadius = 0;
+                d.outerRadius = r;
+                return "translate(" + arc.centroid(d) + ")";        //this gives us a pair of coordinates like [50, 50]
+            })
+            .attr("text-anchor", "middle")                          //center the text on it's origin
+            .text(function(d, i) { var value;
+			if( genderdata[i].label==="0") {
+				value = "Male";}
+			else if ( genderdata[i].label==="1")
+			{value = "Female";}
+			
+			return (value + ":" + genderdata[i].value); })
+
+			
+			
+});		
+	
+	/*pumpPlot1 = svgContainer
+			.selectAll('circle')
+			.data(genderdata)
+			.enter()
+			.append("circle")
+			.style('fill','purple')
+			.attr('r',20).attr('cx', function(d) {return d.key*30; })
+			.attr('cy', function(d) {return d.value*30;});	*/
+			
+			
+/*var barPadding = 5;
+//var barWidth = (svgWidth / dataset.length);
+var barChart = svg.selectAll("rect")
+    .data(genderarray)
+    .enter()
+    .append("rect")
+    .attr("y", function(d) {
+        return svgHeight - d
+    })
+    .attr("height", function(d) {
+        return d;
+    })
+    .attr("width", 10)
+    .attr("transform", function (d, i) {
+         var translate = [barWidth * i, 0];
+         return "translate("+ translate +")";
+    });
+		
+	});*/
+	
+	
+
+	
+	//genderbargraph();
+	//console.log(genderdata);
+	
+	/*data.forEach(genderdata)
+	var bargraph = svgContainer
+			.selectAll('rect')
+			.data(genderdata)
+			.enter()
+			.append("rect")
+			.attr('width','5')
+			.attr('height','20')
+			.attr('x','300')
+			.attr('y','200')*/
+			
+	
+//Plotting the data read above
+
+
+		/*var CHART_WIDTH = 400;
+		var CHART_HEIGHT = 200;
+
+		var MAX_BAR_HEIGHT = 100;
+
+		var deathDays= [];
+		
+		//var svgContainer2 = d3.select("body").append("svg").attr("width","600").attr("height","1000");
+
+//function to draw the graph chart
+		function genderbargraph()
+
+{
+			var maxValue = d3.max(genderdata);
+			var xScale = d3.scale.linear();
+			var yScale = d3.scale.linear();
+			var maxValue = d3.max(genderdata);
+
+			xScale.domain([0,1]).range([0, CHART_WIDTH]);
+			yScale.domain([0, 150]).range([CHART_HEIGHT, 0]);
+			
+			var g = d3.select('svg').select('g');
+
+			var xAxis = d3.svg.axis()
+    			.scale(xScale)
+    			.orient('bottom')
+			.ticks(2)
+    			//.tickFormat(function(d) { return "" + d; })
+
+    		var yAxis = d3.svg.axis()
+    			.scale(yScale)
+    			.orient('left');
+
+
+    		g.append('g')
+    			.attr('class', 'axis')
+    			.attr('transform', 'translate(0,' + CHART_HEIGHT + ')')
+    			.call(xAxis);
+			//.attr("transform", function(d) {
+				//return "translate(" + this.getBox().height + "," + this.getBox().height + ")rotate(-45)";});
+
+    		g.append('g')
+    			.attr('class', 'axis')
+    			.call(yAxis);
+
+    		
+				
+				// Define the line
+	
+	
+		g.selectAll('rect')
+    			.data(genderdata)
+    			.enter()
+    			.append('rect')
+    			.style('fill', 'steelblue')
+				.attr("width","5")
+				.attr("height","10")
+				.attr("x","30")
+				.attr("y","50")
+    	
+					/*.on("mouseover", function(d,i) {g.append("text")
+		
+			.attr({
+               id: "t" + d.date + "-" + d.deaths + "-" + i,  // Create an id for text so we can select it later for removing on mouseout
+                x: function() { return xScale(d.date) - 20; },
+                y: function() { return yScale(d.deaths) - 5; }
+            })
+            .text(function() {
+              return [ formatMyTime(d.date) + "," +d.deaths]
+			  ;  // Value of the text
+            })
+			.attr("id","nowtext");
+			const d3This = d3.select(this);
+			displaydaydeaths(d3This);})
+			.on("mouseout", function(d,i) { 
+			 g.selectAll("#nowtext").style("display","none");
+			
+			})*/
+		
+		
+
+
+	
+
+	
+	
+
+
+//Things to do
+//add legends-done
+//add titles-mon
+//realign web page-mon
+//color blindness check-done
+//buttons for documentation & video-done
+//connect two graphs-mon
+// check requirements-mon
+//video add-mon
+//launch web page-mon
+
+
+
+
+
+
+</script>
+</body>
+</html>
